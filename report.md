@@ -19,7 +19,9 @@ distribution, not just the point forecast.
 Every number below comes out of one place: the rolling-origin harness —
 eight folds, twelve months each, step twelve — with each fold's error
 scaled against only the history that fold was allowed to see. No single
-holdout is used as evidence for a ranking.
+holdout is used as evidence for a ranking. Naive is the non-seasonal
+benchmark; its higher coverage (0.69) is not a win, because its MASE of
+2.12 makes the band wide enough to catch anything and tell nothing.
 
 ## The harness table
 
@@ -29,6 +31,7 @@ holdout is used as evidence for a ranking.
 | **AutoARIMA** (ship) | **0.66** | **0.70** | **0.034** | 0.68 |
 | AutoTheta | 0.90 | 0.99 | 0.046 | 0.59 |
 | AutoETS | 0.95 | 1.00 | 0.050 | 0.49 |
+| Naive (benchmark) | 2.12 | 2.45 | 0.110 | 0.69 |
 
 MASE and scaled CRPS are averaged across the eight folds; coverage is the
 share of held-out points that fell inside each model's own 80% band. The
@@ -72,11 +75,10 @@ under-dispersed relative to what actually lands outside them.
 **Add conformal (split-conformal) intervals on top of AutoARIMA's point
 forecast, recalibrated on the same rolling-origin folds.** The point forecast
 is already good enough to ship; the gap is purely the band. Conformal
-calibration trades a little width for a coverage guarantee (it will hit 80%
-on held-out data by construction) without touching the forecast itself, and
-it reuses the harness already in this notebook — no new model, no new data,
-just an honest band. Expected effect: coverage moves from 68% to ≈80%, with
-a small, quantified widening of the band.
+calibration should move realized coverage toward 80%, and the harness will
+measure the trade-off in width — no new model, no new data, just a
+better-calibrated band. Expected effect: coverage rises from 68% toward 80%,
+with a small, quantified widening of the band.
 
 ---
 
@@ -103,5 +105,5 @@ models between.
   that fold's cutoff (`score_cv` passes `train_df = history`).
 - **Intervals are present** in both notebook (fan chart, coverage column) and
   this report (width, coverage, honesty verdict).
-- AutoARIMA emitted harmless convergence warnings (optimizer code 2) on a few
-  folds; the fits and the cross-validated numbers are stable.
+- AutoARIMA emitted convergence warnings (optimizer code 2) on a few folds;
+  they did not stop execution, and the cross-validated numbers are stable.
